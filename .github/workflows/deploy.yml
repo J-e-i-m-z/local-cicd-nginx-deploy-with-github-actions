@@ -25,8 +25,8 @@ jobs:
         # Remove old files
         sudo rm -rf /var/www/site1.local/*
         
-        # Copy new files
-        sudo cp -r * /var/www/site1.local/
+        # Copy only site files
+        sudo cp -r sample-website/* /var/www/site1.local/
 
         # Set proper permissions
         sudo chown -R nginx:nginx /var/www/site1.local
