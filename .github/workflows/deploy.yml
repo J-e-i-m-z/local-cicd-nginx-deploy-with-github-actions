@@ -1,29 +1,36 @@
-name: Deploy to Vagrant VM
+name: Deploy to nginx web-server in Vagrant VM 
 
-on:
+on: 
   push:
-    branches: ["main"]
+    branches: [ "main" ]
+    paths-ignore: 
+      - '.github/workflows/*'  # Ignore workflow file changes
+
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    runs-on: self-hosted
 
-      - name: Install SSH Key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    # Prevent pipeline from triggering if the only change is to the deploy workflow file itself
+    if: |
+      !contains(github.event.head_commit.modified, '.github/workflows/deploy.yml') &&
+      github.event_name == 'push'
+  
+    steps: 
+    - name: Checkout code
+      uses: actions/checkout@v4 
 
-      - name: Prepare Target Directory
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_IP }} "
-            sudo mkdir -p /var/www/site1.local/
-            sudo chown -R $USER:$USER /var/www/site1.local/
-            sudo chmod -R 755 /var/www/site1.local/
-          "
+    - name: Deploy files to nginx 
+      run: |
+        # Remove old files
+        sudo rm -rf /var/www/site1.local/*
+        
+        # Copy only site files
+        sudo cp -r sample-website/* /var/www/site1.local/
 
-      - name: Deploy Files to VM
-        run: |
-          scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.SSH_USER }}@${{ secrets.VM_IP }}:/var/www/site1.local/
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_IP }} "sudo systemctl restart nginx"
+        # Set proper permissions
+        sudo chown -R nginx:nginx /var/www/site1.local
+        sudo chmod -R 755 /var/www/site1.local
+        
+        # Optional: Restart Nginx if needed
+        # sudo systemctl restart nginx
