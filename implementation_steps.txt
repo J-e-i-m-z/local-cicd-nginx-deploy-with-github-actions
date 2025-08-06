@@ -1,0 +1,28 @@
+1. Configure a Self-Hosted Runner on GitHub
+   - GitHub-hosted runners (the default runners provided by GitHub):
+   - VM must be accessible from the public internet to use github-hosted runners 
+     because GitHub needs to SSH into the VM to deploy code
+     but GitHub can’t reach something running only on a private/local machine.
+   
+   - Go to your repository on GitHub.
+   - Click on Settings → Actions → Runners.
+   - Click New self-hosted runner.
+   - Choose Linux and x64 (if VM is Linux and 64-bit).
+   - GitHub will give you these commands to run
+     *Download commands
+     *Configure commands
+   - After configuring you may experience this error
+     *The local machine's clock may be out of sync with the server time by more than five minutes.
+      Please sync your clock with your domain or internet time and try again.
+      ( This will prevent the runner from working properly )
+      Fix the issue, inside your VM 
+    
+    - Last Step: Start the runner
+      *./run.sh
+
+2. Pipeline Development
+   - Since we have set up your self-hosted runner on Vagrant VM,
+     we no longer need to SSH or SCP into the VM from GitHub Actions. 
+     Instead, GitHub will trigger the workflow directly on the VM where the runner is installed.
+
+
